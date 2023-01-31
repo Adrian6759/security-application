@@ -212,4 +212,6 @@ Temporary Items
 # Ignore Gradle build output directory
 build
 
+/Users/adrianhernandez/projects/courses/code-401/d16Security/src/main/resources/application.properties
 src/main/resources/application.properties
+https://github.com/Adrian6759/security-application/blob/4e9e9b26cbbc181e657456d4f8c54dd7ac2f9698/src/main/resources/application.properties
