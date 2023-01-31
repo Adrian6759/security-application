@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.view.RedirectView;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Date;
@@ -37,8 +38,16 @@ public class SiteUserController {
         //Save the user
         siteUserRepository.save(newUser);
         //Auto login
+        autoAuthWithHttpServletRequest(username, password);
         //Return redirectView
-        return new RedirectView("/login");
+        return new RedirectView("/");
+    }
+    public void autoAuthWithHttpServletRequest(String username, String password){
+        try{
+            request.login(username, password);
+        } catch (ServletException se) {
+            se.printStackTrace();
+        }
     }
     @GetMapping("/login")
     public String getLoginPage(){
