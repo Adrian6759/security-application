@@ -5,14 +5,24 @@
     <title>My Profile</title>
 </head>
 <body>
-<h1 th:text="${'Hey, ' + viewUser.username + '. Welcome to your profile page!'}"></h1>
+<h1 th:text="${'Hey, ' + authUser.username + '. Welcome to your profile page!'}"></h1>
 <img src="unsplash.jpg" alt="" width="250" height="300"></img>
 <div>
 Photo by <a href="https://unsplash.com/@sklepacki?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText">Stephanie Klepacki</a> on <a href="https://images.unsplash.com/photo-1579652032207-611ccd5cd6b0?ixid=MnwxMjA3fDB8MXxzZWFyY2h8MjB8fGNhcnRvb24lMjBmYWNlfGVufDB8fHx8MTY3NTIzMjY3OQ&ixlib=rb-4.0.3&dpr=1&auto=format&fit=crop&w=120&h=200&q=60">Unsplash</a>
 </div>
 
-<h2 th:text="${'Username: ' + viewUser.username}"></h2>
-<h2 th:text="${'First name: ' + viewUser.firstName}"></h2>
+<h2 th:text="${'Username: ' + authUser.username}"></h2>
+<h2 th:text="${'First name: ' + authUser.firstName}"></h2>
+<h2 th:text="${'Last name: ' + authUser.lastName}"></h2>
+<h2 th:text="${'DOB: ' + authUser.dateOfBirth}"></h2>
+<h2 th:text="${'User Bio: ' + authUser.bio}"></h2>
 
+<!--<form th:action="${'/user/' + viewUser.id}" th:method="POST">-->
+<!--    <label for="username">Username</label>-->
+<!--    <input th:value="${viewUser.username}" type="text" name="username" th:disabled="${!authUser.username.equals(viewUser.username)}"/>-->
+<!--    <label for="firstName">First Name</label>-->
+<!--    <input th:value="${viewUser.firstName}" type="text" name="firstName" th:disabled="${!authUser.username.equals(viewUser.username)}"/>-->
+<!--    <input type="submit" value="Edit User Info"/>-->
+<!--</form>-->
 </body>
 </html>
