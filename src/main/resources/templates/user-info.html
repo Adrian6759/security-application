@@ -21,5 +21,22 @@
 <input th:value="${viewUser.firstName}" type="text" name="firstName" th:disabled="${!authUser.username.equals(viewUser.username)}"/>
 <input type="submit" value="Edit User Info"/>
 </form>
+
+<form th:action="${'/follow-user/' + viewUser.id}" th:method="PUT">
+    <input type="hidden" th:value="${viewUser.username}">
+    <input type="submit" value="Follow User" th:disabled="${authUser.username.equals(viewUser.username)}">
+</form>
+
+<h2>Users followed</h2>
+<ul th:each="followedUser : ${usersIFollow}">
+    <li th:text="${followedUser.username}"></li>
+</ul>
+<h2>Users that follow this user</h2>
+<ul th:each="userThatFollows : ${usersWhoFollowMe}">
+    <li th:text="${userThatFollows.username}"></li>
+</ul>
+
+
+</form>
 </body>
 </html>

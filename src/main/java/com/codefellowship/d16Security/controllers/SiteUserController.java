@@ -1,6 +1,8 @@
 package com.codefellowship.d16Security.controllers;
 
+import com.codefellowship.d16Security.models.Posts;
 import com.codefellowship.d16Security.models.SiteUser;
+import com.codefellowship.d16Security.repositories.PostsRepository;
 import com.codefellowship.d16Security.repositories.SiteUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +18,9 @@ import org.springframework.web.servlet.view.RedirectView;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 //Step 2: Create controller for SiteUser
@@ -23,6 +28,9 @@ import java.util.Date;
 public class SiteUserController {
     @Autowired
     SiteUserRepository siteUserRepository;
+
+    @Autowired
+    PostsRepository postsRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -66,14 +74,14 @@ public class SiteUserController {
     public String getSecretSauce() {
         return "secretSauce.html";
     }
-    @GetMapping("/myProfile/{id}")
-    public String getMyProfile(@PathVariable Long id, Model m, Principal p) {
+    @GetMapping("/myProfile")
+    public String getMyProfile( Model m, Principal p) {
         SiteUser authenticatedUser = siteUserRepository.findByUsername(p.getName());
         m.addAttribute("authUser", authenticatedUser);
         //FInd User By ID from DB
-        SiteUser viewUser = siteUserRepository.findById(id).orElseThrow();
-        //Attach tje user to the model
-        m.addAttribute("viewUser", viewUser);
+//        SiteUser viewUser = siteUserRepository.findById(id).orElseThrow();
+//        //Attach tje user to the model
+//        m.addAttribute("viewUser", viewUser);
         return "myProfile.html";
     }
     @GetMapping("/user/{id}")
@@ -84,16 +92,29 @@ public class SiteUserController {
         SiteUser viewUser = siteUserRepository.findById(id).orElseThrow();
         //Attach tje user to the model
         m.addAttribute("viewUser", viewUser);
+
+        //Add users I follow and userWhoFOlowMe to the page to be consumed
+        m.addAttribute("usersIFollow", viewUser.getUsersIFollow());
+        m.addAttribute("usersWhoFollowMe", viewUser.getUsersWhoFollowMe());
+
         return "user-info.html";
 
     }
     //Get route to /users/id to get One user -> sed this to user-info.html
     @PostMapping("/signup")
-    public RedirectView createSiteUser(String username, String password, String firstName) {
+    public RedirectView createSiteUser(String username, String password, String firstName, String lastName , String dateOfBirth, String bio) {
         //has the PW
         String hashedPW = passwordEncoder.encode(password);
+        String stringDate = dateOfBirth;
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Date formattedDate;
+        try {
+             formattedDate = format.parse(stringDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         //Create the user
-        SiteUser newUser = new SiteUser(username, hashedPW, firstName, new Date());
+        SiteUser newUser = new SiteUser(username, hashedPW, firstName, lastName, formattedDate, bio);
         //Save the user
         siteUserRepository.save(newUser);
         //Auto login
@@ -101,6 +122,24 @@ public class SiteUserController {
         //Return redirectView
         return new RedirectView("/");
     }
+
+    @PostMapping("/addPost")
+    public RedirectView createPost(Principal p, String postBody, Model m) {
+        if (p != null){
+            String username = p.getName();
+            SiteUser siteUser = siteUserRepository.findByUsername(username);
+            m.addAttribute("addPost", siteUser.getListOfPosts());
+            Date date = new Date();
+        Posts newPost = new Posts(postBody, date);
+
+        postsRepository.save(newPost);
+
+//        autoAuthWithHttpServletRequest();
+
+        }
+        return new RedirectView("/myProfile");
+    }
+
     public void autoAuthWithHttpServletRequest(String username, String password){
         try{
             request.login(username, password);
@@ -123,5 +162,25 @@ public class SiteUserController {
         redir.addFlashAttribute("errorMessage", "That's nacho cheese");
         }
         return new RedirectView("/user/" + id);
+    }
+    @PutMapping("/follow-user/{id}")
+    public RedirectView followUser(Principal p, @PathVariable Long id) {
+        SiteUser userToFollow = siteUserRepository.findById(id).orElseThrow(() -> new RuntimeException("Error reading" +
+                " " +
+                "user from the database with ID of: " + id));
+        SiteUser browsingUser = siteUserRepository.findByUsername(p.getName());
+
+        //Check user not trying to follow their self
+        if(browsingUser.getUsername().equals(userToFollow.getUsername())) {
+            throw new IllegalArgumentException("You can't follow yourself");
+        }
+
+        //access followers from browsing User and update with new userToFollow
+        browsingUser.getUsersIFollow().add(userToFollow);
+
+        //Save to the DB
+        siteUserRepository.save(browsingUser);
+
+    return new RedirectView("/user/" + id);
     }
 }
